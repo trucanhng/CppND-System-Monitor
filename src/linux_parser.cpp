@@ -33,7 +33,7 @@ string LinuxParser::OperatingSystem() {
   return value;
 }
 
-// Parse the /proc/version to find & return the kernel identifier 
+// Parse the /proc/version to find & return the kernel identifier
 string LinuxParser::Kernel() {
   string os, kernel;
   string line;
@@ -88,8 +88,27 @@ long LinuxParser::IdleJiffies() { return 0; }
 // TODO: Read and return CPU utilization
 vector<string> LinuxParser::CpuUtilization() { return {}; }
 
-// TODO: Read and return the total number of processes
-int LinuxParser::TotalProcesses() { return 0; }
+// Parse the /proc/stat file to find & return the total number of processes
+int LinuxParser::TotalProcesses() {
+  string key;
+  int value;
+  string line;
+  std::ifstream procStat(kProcDirectory + kStatFilename);
+  if (procStat.is_open())
+  {
+    while (std::getline(procStat, line))
+    {
+      std::istringstream linestream(line);
+      while (linestream >> key >> value) {
+        if (key == "processes")
+        {
+          return value;
+        }
+      }
+    }
+  }
+  return value;
+}
 
 // TODO: Read and return the number of running processes
 int LinuxParser::RunningProcesses() { return 0; }

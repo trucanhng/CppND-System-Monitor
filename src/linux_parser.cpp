@@ -195,11 +195,53 @@ string LinuxParser::Ram(int pid[[maybe_unused]]) { return string(); }
 
 // TODO: Read and return the user ID associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Uid(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::Uid(int pid) {
+  string key, value;
+  string line;
+  std::ifstream pStatus(kProcDirectory + to_string(pid) + kStatFilename);
+  if (pStatus.is_open())
+  {
+    while (getline(pStatus, line))
+    {
+      std::istringstream linestream (line);
+      while (linestream >> key >> value)
+      {
+        if (key == "Uid:")
+        {
+          return value;
+        }
+      }
+    }
+  }
+  return value;
+}
 
 // TODO: Read and return the user associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::User(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::User(int pid) {
+  string user, password, userID;
+  string line;
+  // Find the uid associated with this pid
+  string uid = Uid(pid);
+  std::ifstream passwd(kPasswordPath);
+  if (passwd.is_open())
+  {
+    while (getline(passwd, line))
+    {
+      std::replace (line.begin(), line.end(), ':', ' ');
+      std::istringstream linestream(line);
+      while (linestream >> user >> password >> userID)
+      {
+        if (userID == uid)
+        {
+          return user;
+        }
+      }
+
+    }
+  }
+  return user;
+}
 
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function

@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "linux_parser.h"
 
@@ -9,6 +10,7 @@ using std::stof;
 using std::string;
 using std::to_string;
 using std::vector;
+using std::cout;
 
 // Parse the /etc/os-release to find & return the OS release name
 string LinuxParser::OperatingSystem() {
@@ -66,8 +68,47 @@ vector<int> LinuxParser::Pids() {
   return pids;
 }
 
-// TODO: Read and return the system memory utilization
-float LinuxParser::MemoryUtilization() { return 0.0; }
+// Parse /proc/meminfo to get mem info to calculate the system memory utilization
+// memory utilization (%) = 100 - (((memfree + buffers + cached) * 100) / memtotal)
+// I divide by 100 to cancel out the 100 in NCursesDisplay::ProgressBar()
+float LinuxParser::MemoryUtilization() {
+  string key;
+  float memTotal, memFree, buffers, cached;
+  float value;
+  string line;
+  int count = 5;     // We only need to read the first 5 lines
+  std::ifstream procMemInfo (kProcDirectory + kMeminfoFilename);
+  if (procMemInfo.is_open())
+  {
+    while (count > 0)
+    {
+      std::getline(procMemInfo, line);
+      count--;
+      std::istringstream linestream(line);
+      while (linestream >> key >> value)
+      {
+        if (key == "MemTotal:")
+        {
+          memTotal = value;
+        }
+        else if (key == "MemFree:")
+        {
+          memFree = value;
+        }
+        else if (key == "Buffers:")
+        {
+          buffers = value;
+        }
+        else if (key == "Cached:")
+        {
+          cached = value;
+        }
+      }
+    }
+  }
+
+return (100 - (((memFree + buffers + cached) * 100) / memTotal)) / 100 ;
+}
 
 // Parse /proc/uptime to find and return the system uptime
 long LinuxParser::UpTime() {

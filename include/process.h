@@ -8,7 +8,7 @@ It contains relevant attributes as shown below
 */
 class Process {
  public:
-  Process (int pid) : pid_(pid) {}
+  Process (int pid); 
   int Pid();                               // TODO: See src/process.cpp
   std::string User();
   std::string Command();                   // TODO: See src/process.cpp

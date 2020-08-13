@@ -26,7 +26,8 @@ vector<Process>& System::Processes() {
     processes_.push_back(process);
   }
 
-  // TODO: Sort processes according to its CPU utilization 
+  // TODO: Sort processes according to its CPU utilization
+  // TODO: Remove zombie processes that do not have RAM utilization, command
   return processes_;
 }
 

@@ -187,18 +187,47 @@ int LinuxParser::RunningProcesses() {
 
 // TODO: Read and return the command associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid[[maybe_unused]]) { return string(); }
+string LinuxParser::Command(int pid) {
+  string line;
+  std::ifstream pCmd(kProcDirectory + to_string(pid) + kCmdlineFilename);
+  if (pCmd.is_open())
+  {
+    getline(pCmd, line);
+  }
+  return line;
+}
 
-// TODO: Read and return the memory used by a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Ram(int pid[[maybe_unused]]) { return string(); }
+// Parse /proc/[pid]/status to read and return the memory used by a process
+string LinuxParser::Ram(int pid) {
+  string key;
+  int value;
+  string line;
+  std::ifstream pStatus(kProcDirectory + to_string(pid) + kStatusFilename);
+  if (pStatus.is_open())
+  {
+    while (getline(pStatus, line))
+    {
+      std::istringstream linestream(line);
+      while (linestream >> key >> value)
+      {
+        if (key == "VmSize:")
+        {
+          //return to_string(value / 1000);
+          return to_string (value / 1000);
+        }
+      }
+    }
+  }
+
+  return to_string(value / 1000);
+}
 
 // TODO: Read and return the user ID associated with a process
 // REMOVE: [[maybe_unused]] once you define the function
 string LinuxParser::Uid(int pid) {
   string key, value;
   string line;
-  std::ifstream pStatus(kProcDirectory + to_string(pid) + kStatFilename);
+  std::ifstream pStatus(kProcDirectory + to_string(pid) + kStatusFilename);
   if (pStatus.is_open())
   {
     while (getline(pStatus, line))

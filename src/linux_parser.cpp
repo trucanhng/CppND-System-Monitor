@@ -124,18 +124,74 @@ long LinuxParser::UpTime() {
   return upTime;
 }
 
-// TODO: Read and return the number of jiffies for the system
-long LinuxParser::Jiffies() { return 0; }
+// Calculate and return the total CPU jiffies for the system
+long LinuxParser::Jiffies() {
+  long jiffies{0};
+  string line;
+  string key;
+  long value;
+  std::ifstream procStat (kProcDirectory + kStatFilename);
+  if (procStat.is_open())
+  {
+    std::getline(procStat, line);    // We need only the first line
+    std::istringstream linestream(line);
+    linestream >> key;     // discard the 'cpu' string
+    while (linestream >> value)
+    {
+      jiffies += value;
+    }
+  }
+
+  return jiffies;
+}
 
 // TODO: Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::ActiveJiffies(int pid[[maybe_unused]]) { return 0; }
 
-// TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
+// Calculate and return the number of active jiffies for the system
+long LinuxParser::ActiveJiffies() {
+  std::vector<long> cpuStat{};
+  string line, key;
+  long value;
+  std::ifstream procStat (kProcDirectory + kStatFilename);
+  if (procStat.is_open())
+  {
+    std::getline (procStat, line);   // only need the first line
+    std::istringstream linestream (line);
+    linestream >> key;   // discard the 'cpu' string
+    while (linestream >> value)
+    {
+      cpuStat.push_back(value);
+    }
 
-// TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
+  }
+  return cpuStat[CPUStates::kUser_] + cpuStat[CPUStates::kNice_]
+        + cpuStat[CPUStates::kSystem_] + cpuStat[CPUStates::kIRQ_]
+        + cpuStat[CPUStates::kSoftIRQ_] + cpuStat[CPUStates::kSteal_];
+
+}
+
+// Calculate and return the number of idle jiffies for the system
+long LinuxParser::IdleJiffies() {
+  std::vector<long> cpuStat{};
+  string line, key;
+  long value;
+  std::ifstream procStat (kProcDirectory + kStatFilename);
+  if (procStat.is_open())
+  {
+    std::getline (procStat, line);   // only need the first line
+    std::istringstream linestream (line);
+    linestream >> key;   // discard the 'cpu' string
+    while (linestream >> value)
+    {
+      cpuStat.push_back(value);
+    }
+
+  }
+  return cpuStat[CPUStates::kIdle_] + cpuStat[CPUStates::kIOwait_];
+
+}
 
 // TODO: Read and return CPU utilization
 vector<string> LinuxParser::CpuUtilization() { return {}; }

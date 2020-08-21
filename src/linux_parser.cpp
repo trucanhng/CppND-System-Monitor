@@ -145,9 +145,28 @@ long LinuxParser::Jiffies() {
   return jiffies;
 }
 
-// TODO: Read and return the number of active jiffies for a PID
-// REMOVE: [[maybe_unused]] once you define the function
-long LinuxParser::ActiveJiffies(int pid[[maybe_unused]]) { return 0; }
+// Read and return the number of active jiffies for a PID
+long LinuxParser::ActiveJiffies(int pid) {
+  string line, key;
+  long jiffies{0};
+  long value;
+  std::ifstream pStat (kProcDirectory + to_string(pid) + kStatFilename);
+  if (pStat.is_open())
+  {
+    std::getline (pStat, line);   // get the whole line first
+    std::istringstream linestream (line);
+    for (int i = 0; i < 13; i++)
+    {
+      linestream >> key;    // discard the first 13 values
+    }
+    for (int i = 0; i < 4; i++)
+    {// Sum up values at #14, #15, #16, #17
+      linestream >> value;
+      jiffies += value;
+    }
+  }
+  return jiffies;
+}
 
 // Calculate and return the number of active jiffies for the system
 long LinuxParser::ActiveJiffies() {
@@ -331,7 +350,8 @@ string LinuxParser::User(int pid) {
 // Read and return the uptime of a process
 long LinuxParser::UpTime(int pid) {
   string line, key;
-  long clockTicks, upTime;
+  long clockTicks;
+  long upTime;
   std::ifstream pStat(kProcDirectory + to_string(pid) + kStatFilename);
   if (pStat.is_open())
   {

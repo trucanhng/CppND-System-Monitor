@@ -21,16 +21,17 @@ int Process::Pid() {
 
 // Return this process's CPU utilization
 float Process::CpuUtilization() {
-  long totalTime = LinuxParser::ActiveJiffies(pid_);
-  long elapsedTime = LinuxParser::UpTime(pid_);
+  long totalTime = LinuxParser::Jiffies(pid_);
+  long elapsedTime = LinuxParser::UpTime() - LinuxParser::UpTime(pid_);
   if (elapsedTime == 0)
   {
-    return 0.0;
+    cpuUtilization_ = 0.0;
   }
   else
   {
-    return totalTime / elapsedTime;
+    cpuUtilization_ = (totalTime / sysconf(_SC_CLK_TCK)) / elapsedTime;
   }
+  return cpuUtilization_; 
 }
 
 // TODO: Return the command that generated this process

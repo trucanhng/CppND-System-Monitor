@@ -145,8 +145,8 @@ long LinuxParser::Jiffies() {
   return jiffies;
 }
 
-// Read and return the number of active jiffies for a PID
-long LinuxParser::ActiveJiffies(int pid) {
+// Read and return the number of total jiffies for a PID
+long LinuxParser::Jiffies(int pid) {
   string line, key;
   long jiffies{0};
   long value;
